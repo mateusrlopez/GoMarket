@@ -4,14 +4,15 @@ type settings struct {
 	Server struct {
 		Port   string
 		Prefix string
+		Secret string
 	}
 
 	Database struct {
-		UserName     string
-		Password     string
-		Host         string
-		Port         string
-		DatabaseName string
+		UserName string
+		Password string
+		Host     string
+		Port     string
+		Name     string
 	}
 }
 

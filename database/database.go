@@ -26,7 +26,7 @@ func formatDSN() string {
 		settings.Settings.Database.Host,
 		settings.Settings.Database.UserName,
 		settings.Settings.Database.Password,
-		settings.Settings.Database.DatabaseName,
+		settings.Settings.Database.Name,
 		settings.Settings.Database.Port,
 	)
 }
