@@ -29,12 +29,6 @@ func AuthorizationMiddleware(h http.HandlerFunc) http.HandlerFunc {
 		}
 
 		token := splittedTokenHeader[1]
-
-		if token == "" {
-			responses.Error(w, http.StatusUnauthorized, errors.New("Unauthorized"))
-			return
-		}
-
 		ctp, err := utils.ValidateToken(token)
 
 		if err != nil {
