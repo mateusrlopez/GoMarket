@@ -13,7 +13,7 @@ import (
 )
 
 type AuthHandler struct {
-	Repository repositories.UserRepository
+	UserRepository repositories.UserRepository
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -39,14 +39,14 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = h.Repository.Create(&user)
+	err = h.UserRepository.Create(&user)
 
 	if err != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	token, err := utils.GenerateToken(user.ID)
+	token, err := utils.GenerateToken(user.ID, false)
 
 	if err != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, err)
@@ -82,7 +82,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	retrievedUser := models.User{}
-	err = h.Repository.RetrieveByEmail(user.Email, &retrievedUser)
+	err = h.UserRepository.RetrieveByEmail(user.Email, &retrievedUser)
 
 	if err != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, err)
@@ -96,7 +96,7 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.GenerateToken(retrievedUser.ID)
+	token, err := utils.GenerateToken(retrievedUser.ID, false)
 
 	if err != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, err)

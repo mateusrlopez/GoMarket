@@ -3,6 +3,7 @@ package database
 import (
 	"fmt"
 
+	"github.com/mateusrlopez/go-market/models"
 	"github.com/mateusrlopez/go-market/settings"
 	log "github.com/sirupsen/logrus"
 	"gorm.io/driver/postgres"
@@ -16,6 +17,8 @@ func GetConnection() *gorm.DB {
 		log.Fatalf("Error opening connection with postgres database: %s", err)
 		return nil
 	}
+
+	db.AutoMigrate(&models.User{})
 
 	return db
 }

@@ -3,22 +3,23 @@ package models
 import (
 	"time"
 
-	validation "github.com/go-ozzo/ozzo-validation"
-	"github.com/go-ozzo/ozzo-validation/is"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/mateusrlopez/go-market/utils"
 	"gorm.io/gorm"
 )
 
 type User struct {
-	gorm.Model
+	ID        uint      `gorm:"primaryKey;autoIncrement;" json:"id"`
 	FirstName string    `gorm:"size:255;not null;" json:"first_name"`
 	LastName  string    `gorm:"size:255;not null;" json:"last_name"`
 	Email     string    `gorm:"size:255;not null;unique;" json:"email"`
 	Password  string    `gorm:"size:255;not null;" json:"password"`
-	Birthdate time.Time `gorm:"not null;" json:"birthdate"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdateAt  time.Time `json:"updated_at"`
 }
 
-func (u *User) BeforeCreate() error {
+func (u *User) BeforeCreate(tx *gorm.DB) error {
 	hashedPassword, err := utils.Hash(u.Password)
 
 	if err != nil {
@@ -40,7 +41,6 @@ func (u *User) ValidateRegister() error {
 		validation.Field(&u.LastName, validation.Required),
 		validation.Field(&u.Email, validation.Required, is.Email),
 		validation.Field(&u.Password, validation.Required),
-		validation.Field(&u.Birthdate, validation.Required),
 	)
 }
 
