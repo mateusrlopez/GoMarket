@@ -19,12 +19,14 @@ func SetupRoutes() *mux.Router {
 	sr := r.PathPrefix(fmt.Sprintf("/%s", settings.Settings.Server.Prefix)).Subrouter()
 	db := database.GetConnection()
 
+	adminRepository := repositories.AdminRepository{DB: db}
 	userRepository := repositories.UserRepository{DB: db}
 
-	authHandler := handlers.AuthHandler{UserRepository: userRepository}
+	authHandler := handlers.AuthHandler{AdminRepository: adminRepository, UserRepository: userRepository}
 
 	sr.HandleFunc("/auth/register", authHandler.Register).Methods("POST")
 	sr.HandleFunc("/auth/login", authHandler.Login).Methods("POST")
+	sr.HandleFunc("/auth/admin-login", authHandler.AdminLogin).Methods("POST")
 
 	return r
 }

@@ -18,7 +18,7 @@ func GetConnection() *gorm.DB {
 		return nil
 	}
 
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.Admin{}, &models.User{})
 
 	return db
 }

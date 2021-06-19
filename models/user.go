@@ -16,7 +16,6 @@ type User struct {
 	Email     string    `gorm:"size:255;not null;unique;" json:"email"`
 	Password  string    `gorm:"size:255;not null;" json:"password"`
 	CreatedAt time.Time `json:"created_at"`
-	UpdateAt  time.Time `json:"updated_at"`
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) error {
