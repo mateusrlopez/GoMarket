@@ -6,13 +6,20 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/mateusrlopez/go-market/constants"
+	"github.com/mateusrlopez/go-market/models"
+	"github.com/mateusrlopez/go-market/repositories"
 	"github.com/mateusrlopez/go-market/responses"
-	"github.com/mateusrlopez/go-market/utils"
+	"github.com/mateusrlopez/go-market/settings"
+	"github.com/mateusrlopez/go-market/types"
 )
 
-type ContextKey string
+type AuthorizationMiddleware struct {
+	TokenRepository repositories.TokenRepository
+	UserRepository  repositories.UserRepository
+}
 
-func AuthorizationMiddleware(h http.HandlerFunc) http.HandlerFunc {
+func (m *AuthorizationMiddleware) AccessMiddleware(h http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tokenHeader := r.Header.Get("Authorization")
 
@@ -29,15 +36,30 @@ func AuthorizationMiddleware(h http.HandlerFunc) http.HandlerFunc {
 		}
 
 		token := splittedTokenHeader[1]
-		ctp, err := utils.ValidateToken(token)
+		tmd, err := m.TokenRepository.ValidateToken(token, settings.Settings.Server.AccessSecret)
 
 		if err != nil {
 			responses.Error(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 			return
 		}
 
-		const ctk ContextKey = "claims"
-		ctx := context.WithValue(r.Context(), ctk, ctp)
+		err = m.TokenRepository.RetrieveTokenMetadata(tmd.UUID)
+
+		if err != nil {
+			responses.Error(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			return
+		}
+
+		user := &models.User{}
+		err = m.UserRepository.RetriveByID(uint(tmd.UserId), user)
+
+		if err != nil {
+			responses.Error(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			return
+		}
+
+		ctp := types.ContextPayload{User: user, TokenId: tmd.UUID}
+		ctx := context.WithValue(r.Context(), constants.ContextKey, ctp)
 
 		h(w, r.WithContext(ctx))
 	}

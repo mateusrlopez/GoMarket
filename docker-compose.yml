@@ -14,7 +14,20 @@ services:
     volumes:
       - database:/var/lib/postgresql/data
 
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    container_name: redis_container
+    restart: always
+    volumes:
+      - redis:/data
+
 volumes:
   database:
     name: postgres_volume_gomarket
+    driver: local
+
+  redis:
+    name: redis_volume_gomarket
     driver: local

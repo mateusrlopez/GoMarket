@@ -2,19 +2,19 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 
+	"github.com/mateusrlopez/go-market/constants"
 	"github.com/mateusrlopez/go-market/models"
 	"github.com/mateusrlopez/go-market/repositories"
 	"github.com/mateusrlopez/go-market/responses"
-	"github.com/mateusrlopez/go-market/utils"
+	"github.com/mateusrlopez/go-market/types"
 )
 
 type AuthHandler struct {
 	UserRepository  repositories.UserRepository
-	AdminRepository repositories.AdminRepository
+	TokenRepository repositories.TokenRepository
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
@@ -47,16 +47,14 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.GenerateToken(user.ID, false)
+	tr, err := h.TokenRepository.GenerateTokens(user.ID)
 
 	if err != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", token))
-
-	responses.JSON(w, http.StatusCreated, user)
+	responses.JSON(w, http.StatusCreated, tr)
 }
 
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
@@ -97,64 +95,31 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := utils.GenerateToken(retrievedUser.ID, false)
+	tr, err := h.TokenRepository.GenerateTokens(retrievedUser.ID)
 
 	if err != nil {
 		responses.Error(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", token))
-
-	responses.JSON(w, http.StatusOK, retrievedUser)
+	responses.JSON(w, http.StatusOK, tr)
 }
 
-func (h *AuthHandler) AdminLogin(w http.ResponseWriter, r *http.Request) {
-	body, err := ioutil.ReadAll(r.Body)
+func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
+	ctp := r.Context().Value(constants.ContextKey).(types.ContextPayload)
+
+	responses.JSON(w, http.StatusOK, ctp.User)
+}
+
+func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	ctp := r.Context().Value(constants.ContextKey).(types.ContextPayload)
+
+	err := h.TokenRepository.DeleteTokenMetadata(ctp.TokenId)
 
 	if err != nil {
-		responses.Error(w, http.StatusUnprocessableEntity, err)
+		responses.Error(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	admin := models.Admin{}
-	err = json.Unmarshal(body, &admin)
-
-	if err != nil {
-		responses.Error(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	err = admin.ValidateLogin()
-
-	if err != nil {
-		responses.Error(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	retrievedAdmin := models.Admin{}
-	err = h.AdminRepository.RetrieveByEmail(admin.Email, &retrievedAdmin)
-
-	if err != nil {
-		responses.Error(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	err = retrievedAdmin.ComparePassword(admin.Password)
-
-	if err != nil {
-		responses.Error(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	token, err := utils.GenerateToken(retrievedAdmin.ID, true)
-
-	if err != nil {
-		responses.Error(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	w.Header().Set("Authorization", fmt.Sprintf("Bearer %s", token))
-
-	responses.JSON(w, http.StatusOK, retrievedAdmin)
+	responses.JSON(w, http.StatusOK, nil)
 }

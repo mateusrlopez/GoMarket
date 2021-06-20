@@ -10,22 +10,22 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetConnection() *gorm.DB {
-	db, err := gorm.Open(postgres.Open(formatDSN()), &gorm.Config{})
+func GetPostgresConnection() *gorm.DB {
+	db, err := gorm.Open(postgres.Open(formatPostgresDSN()), &gorm.Config{})
 
 	if err != nil {
 		log.Fatalf("Error opening connection with postgres database: %s", err)
 		return nil
 	}
 
-	db.AutoMigrate(&models.Admin{}, &models.User{})
+	db.AutoMigrate(&models.User{})
 
 	return db
 }
 
-func formatDSN() string {
+func formatPostgresDSN() string {
 	return fmt.Sprintf(
-		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
+		"host=%s user=%s password=%s dbname=%s port=%d sslmode=disable",
 		settings.Settings.Database.Host,
 		settings.Settings.Database.UserName,
 		settings.Settings.Database.Password,

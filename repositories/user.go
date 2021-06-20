@@ -16,3 +16,7 @@ func (r *UserRepository) Create(user *models.User) error {
 func (r *UserRepository) RetrieveByEmail(email string, user *models.User) error {
 	return r.DB.Where("email = ?", email).Take(user).Error
 }
+
+func (r *UserRepository) RetriveByID(id uint, user *models.User) error {
+	return r.DB.Where("id = ?", id).Take(user).Error
+}

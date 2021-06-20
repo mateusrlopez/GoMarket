@@ -13,20 +13,24 @@ import (
 
 func SetupRoutes() *mux.Router {
 	r := mux.NewRouter()
+	sr := r.PathPrefix(fmt.Sprintf("/%s", settings.Settings.Server.Prefix)).Subrouter()
 
 	r.Use(middlewares.HeadersMiddleware)
 
-	sr := r.PathPrefix(fmt.Sprintf("/%s", settings.Settings.Server.Prefix)).Subrouter()
-	db := database.GetConnection()
+	db := database.GetPostgresConnection()
+	rdb := database.GetRedisConnection()
 
-	adminRepository := repositories.AdminRepository{DB: db}
+	tokenRepository := repositories.TokenRepository{DB: rdb}
 	userRepository := repositories.UserRepository{DB: db}
 
-	authHandler := handlers.AuthHandler{AdminRepository: adminRepository, UserRepository: userRepository}
+	authHandler := handlers.AuthHandler{TokenRepository: tokenRepository, UserRepository: userRepository}
+
+	authMiddleware := middlewares.AuthorizationMiddleware{TokenRepository: tokenRepository, UserRepository: userRepository}
 
 	sr.HandleFunc("/auth/register", authHandler.Register).Methods("POST")
 	sr.HandleFunc("/auth/login", authHandler.Login).Methods("POST")
-	sr.HandleFunc("/auth/admin-login", authHandler.AdminLogin).Methods("POST")
+	sr.HandleFunc("/auth/logout", authMiddleware.AccessMiddleware(authHandler.Logout)).Methods("POST")
+	sr.HandleFunc("/auth/me", authMiddleware.AccessMiddleware(authHandler.Me)).Methods("GET")
 
 	return r
 }
