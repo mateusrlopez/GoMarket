@@ -9,9 +9,10 @@ import (
 	"github.com/mateusrlopez/go-market/constants"
 	"github.com/mateusrlopez/go-market/models"
 	"github.com/mateusrlopez/go-market/repositories"
-	"github.com/mateusrlopez/go-market/responses"
 	"github.com/mateusrlopez/go-market/settings"
 	"github.com/mateusrlopez/go-market/types"
+	"github.com/mateusrlopez/go-market/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AuthorizationMiddleware struct {
@@ -24,14 +25,14 @@ func (m *AuthorizationMiddleware) AccessMiddleware(h http.HandlerFunc) http.Hand
 		tokenHeader := r.Header.Get("Authorization")
 
 		if tokenHeader == "" {
-			responses.Error(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			utils.ErrorResponse(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 			return
 		}
 
 		splittedTokenHeader := strings.Split(tokenHeader, " ")
 
 		if len(splittedTokenHeader) != 2 {
-			responses.Error(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			utils.ErrorResponse(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 			return
 		}
 
@@ -39,22 +40,29 @@ func (m *AuthorizationMiddleware) AccessMiddleware(h http.HandlerFunc) http.Hand
 		tmd, err := m.TokenRepository.ValidateToken(token, settings.Settings.Server.AccessSecret)
 
 		if err != nil {
-			responses.Error(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			utils.ErrorResponse(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 			return
 		}
 
 		err = m.TokenRepository.RetrieveTokenMetadata(tmd.UUID)
 
 		if err != nil {
-			responses.Error(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			utils.ErrorResponse(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 			return
 		}
 
 		user := &models.User{}
-		err = m.UserRepository.RetriveByID(uint(tmd.UserId), user)
+		id, err := primitive.ObjectIDFromHex(tmd.UserId)
 
 		if err != nil {
-			responses.Error(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			utils.ErrorResponse(w, http.StatusUnauthorized, errors.New("Unauthorized"))
+			return
+		}
+
+		err = m.UserRepository.RetriveByID(id, user)
+
+		if err != nil {
+			utils.ErrorResponse(w, http.StatusUnauthorized, errors.New("Unauthorized"))
 			return
 		}
 

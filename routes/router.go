@@ -17,11 +17,11 @@ func SetupRoutes() *mux.Router {
 
 	r.Use(middlewares.HeadersMiddleware)
 
-	db := database.GetPostgresConnection()
+	db := database.GetMongoConnection()
 	rdb := database.GetRedisConnection()
 
 	tokenRepository := repositories.TokenRepository{DB: rdb}
-	userRepository := repositories.UserRepository{DB: db}
+	userRepository := repositories.UserRepository{Collection: db.Collection("users")}
 
 	authHandler := handlers.AuthHandler{TokenRepository: tokenRepository, UserRepository: userRepository}
 

@@ -9,7 +9,7 @@ import (
 )
 
 func GetRedisConnection() *redis.Client {
-	opt, err := redis.ParseURL(formatRedisURL())
+	opt, err := redis.ParseURL(formatRedisURI())
 
 	if err != nil {
 		log.Fatalf("Error opening connection with redis database: %s", err)
@@ -19,7 +19,7 @@ func GetRedisConnection() *redis.Client {
 	return redis.NewClient(opt)
 }
 
-func formatRedisURL() string {
+func formatRedisURI() string {
 	return fmt.Sprintf("redis://%s:%d/%d",
 		settings.Settings.Redis.Host,
 		settings.Settings.Redis.Port,

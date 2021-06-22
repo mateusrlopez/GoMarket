@@ -7,5 +7,5 @@ type TokensReturn struct {
 
 type TokenMetadataReturn struct {
 	UUID   string
-	UserId float64
+	UserId string
 }

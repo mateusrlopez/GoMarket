@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -18,7 +17,7 @@ type TokenRepository struct {
 	DB *redis.Client
 }
 
-func (r *TokenRepository) GenerateTokens(sub uint) (*types.TokensReturn, error) {
+func (r *TokenRepository) GenerateTokens(sub string) (*types.TokensReturn, error) {
 	accessClaims := jwt.MapClaims{}
 
 	accessUuid := uuid.NewV4().String()
@@ -64,8 +63,8 @@ func (r *TokenRepository) GenerateTokens(sub uint) (*types.TokensReturn, error) 
 	return &types.TokensReturn{AccessToken: accessToken, RefreshToken: refreshToken}, nil
 }
 
-func (r *TokenRepository) StoreTokenMetadata(uuid string, exp int64, sub uint) error {
-	return r.DB.Set(context.Background(), uuid, strconv.Itoa(int(sub)), time.Until(time.Unix(exp, 0))).Err()
+func (r *TokenRepository) StoreTokenMetadata(uuid string, exp int64, sub string) error {
+	return r.DB.Set(context.Background(), uuid, sub, time.Until(time.Unix(exp, 0))).Err()
 }
 
 func (r *TokenRepository) ValidateToken(tokenString string, secret string) (*types.TokenMetadataReturn, error) {
@@ -87,7 +86,7 @@ func (r *TokenRepository) ValidateToken(tokenString string, secret string) (*typ
 		return nil, errors.New("Invalid token")
 	}
 
-	return &types.TokenMetadataReturn{UUID: claims["jti"].(string), UserId: claims["sub"].(float64)}, nil
+	return &types.TokenMetadataReturn{UUID: claims["jti"].(string), UserId: claims["sub"].(string)}, nil
 }
 
 func (r *TokenRepository) RetrieveTokenMetadata(uuid string) error {

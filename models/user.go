@@ -6,19 +6,20 @@ import (
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
 	"github.com/mateusrlopez/go-market/utils"
-	"gorm.io/gorm"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type User struct {
-	ID        uint      `gorm:"primaryKey;autoIncrement;" json:"id"`
-	FirstName string    `gorm:"size:255;not null;" json:"first_name"`
-	LastName  string    `gorm:"size:255;not null;" json:"last_name"`
-	Email     string    `gorm:"size:255;not null;unique;" json:"email"`
-	Password  string    `gorm:"size:255;not null;" json:"password"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
+	FirstName string             `json:"firstName" bson:"firstName"`
+	LastName  string             `json:"lastName" bson:"lastName"`
+	Email     string             `json:"email" bson:"email"`
+	Password  string             `json:"password" bson:"password"`
+	CreatedAt time.Time          `json:"createdAt,omitempty" bson:"createdAt"`
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) error {
+func (u *User) BeforeCreate() error {
+	u.CreatedAt = time.Now()
 	hashedPassword, err := utils.Hash(u.Password)
 
 	if err != nil {

@@ -1,18 +1,18 @@
 version: "3"
 
 services:
-  postgres:
-    image: postgres:latest
+  mongo:
+    image: mongo:latest
     ports:
-      - "5432:5432"
-    container_name: postgres_container
+      - "27017:27017"
+    container_name: mongo_container
     restart: always
     environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: gomarket
-      POSTGRES_DB: gomarket
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: gomarket
+      MONGO_INITDB_DATABASE: gomarket
     volumes:
-      - database:/var/lib/postgresql/data
+      - database:/data/db
 
   redis:
     image: redis:latest
@@ -25,7 +25,7 @@ services:
 
 volumes:
   database:
-    name: postgres_volume_gomarket
+    name: mongo_volume_gomarket
     driver: local
 
   redis:
