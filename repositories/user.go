@@ -14,7 +14,7 @@ type UserRepository struct {
 }
 
 func (r *UserRepository) Create(user *models.User) (*mongo.InsertOneResult, error) {
-	err := user.BeforeCreate()
+	err := user.BeforeInsert()
 
 	if err != nil {
 		return nil, err

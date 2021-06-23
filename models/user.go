@@ -15,10 +15,11 @@ type User struct {
 	LastName  string             `json:"lastName" bson:"lastName"`
 	Email     string             `json:"email" bson:"email"`
 	Password  string             `json:"password" bson:"password"`
+	Admin     bool               `json:"admin" bson:"admin"`
 	CreatedAt time.Time          `json:"createdAt,omitempty" bson:"createdAt"`
 }
 
-func (u *User) BeforeCreate() error {
+func (u *User) BeforeInsert() error {
 	u.CreatedAt = time.Now()
 	hashedPassword, err := utils.Hash(u.Password)
 

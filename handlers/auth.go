@@ -122,5 +122,5 @@ func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.JSONResponse(w, http.StatusOK, nil)
+	utils.JSONResponse(w, http.StatusNoContent, map[string]interface{}{})
 }
