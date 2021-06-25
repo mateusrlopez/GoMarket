@@ -14,7 +14,8 @@ type User struct {
 	FirstName string             `json:"firstName" bson:"firstName"`
 	LastName  string             `json:"lastName" bson:"lastName"`
 	Email     string             `json:"email" bson:"email"`
-	Password  string             `json:"password" bson:"password"`
+	Password  string             `json:"password,omitempty" bson:"password"`
+	Birthdate string             `json:"birthdate" bson:"birthdate"`
 	Admin     bool               `json:"admin" bson:"admin"`
 	CreatedAt time.Time          `json:"createdAt,omitempty" bson:"createdAt"`
 }
@@ -41,6 +42,7 @@ func (u *User) ValidateRegister() error {
 		validation.Field(&u.FirstName, validation.Required),
 		validation.Field(&u.LastName, validation.Required),
 		validation.Field(&u.Email, validation.Required, is.Email),
+		validation.Field(&u.Birthdate, validation.Required, validation.Date("2006-01-02")),
 		validation.Field(&u.Password, validation.Required),
 	)
 }

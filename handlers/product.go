@@ -32,6 +32,13 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = product.Validate()
+
+	if err != nil {
+		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
 	result, err := h.ProductRepository.Create(&product)
 
 	if err != nil {
@@ -91,6 +98,13 @@ func (h *ProductHandler) Update(w http.ResponseWriter, r *http.Request) {
 
 	product := models.Product{}
 	err = json.Unmarshal(body, &product)
+
+	if err != nil {
+		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	err = product.Validate()
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)

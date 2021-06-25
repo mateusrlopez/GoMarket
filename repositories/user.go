@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type UserRepository struct {
@@ -28,5 +29,5 @@ func (r *UserRepository) RetrieveByEmail(email string, user *models.User) error 
 }
 
 func (r *UserRepository) RetriveByID(id primitive.ObjectID, user *models.User) error {
-	return r.Collection.FindOne(context.Background(), bson.M{"_id": id}).Decode(user)
+	return r.Collection.FindOne(context.Background(), bson.M{"_id": id}, options.FindOne().SetProjection(map[string]interface{}{"password": 0})).Decode(user)
 }
