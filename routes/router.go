@@ -32,6 +32,7 @@ func SetupRoutes() *mux.Router {
 
 	sr.HandleFunc("/auth/register", authHandler.Register).Methods(http.MethodPost)
 	sr.HandleFunc("/auth/login", authHandler.Login).Methods(http.MethodPost)
+	sr.HandleFunc("/auth/refresh", authMiddleware.RefreshMiddleware(authHandler.Refresh)).Methods(http.MethodPost)
 	sr.HandleFunc("/auth/logout", authMiddleware.AccessMiddleware(authHandler.Logout)).Methods(http.MethodPost)
 	sr.HandleFunc("/auth/me", authMiddleware.AccessMiddleware(authHandler.Me)).Methods(http.MethodGet)
 

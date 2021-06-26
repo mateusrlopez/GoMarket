@@ -8,7 +8,6 @@ import (
 	"github.com/mateusrlopez/go-market/constants"
 	"github.com/mateusrlopez/go-market/models"
 	"github.com/mateusrlopez/go-market/repositories"
-	"github.com/mateusrlopez/go-market/types"
 	"github.com/mateusrlopez/go-market/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -107,15 +106,28 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthHandler) Me(w http.ResponseWriter, r *http.Request) {
-	ctp := r.Context().Value(constants.ContextKey).(types.ContextPayload)
+	user := r.Context().Value(constants.ContextKey).(*models.User)
 
-	utils.JSONResponse(w, http.StatusOK, ctp.User)
+	utils.JSONResponse(w, http.StatusOK, user)
+}
+
+func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value(constants.ContextKey).(*models.User)
+
+	tr, err := h.TokenRepository.GenerateTokens(user.ID.Hex())
+
+	if err != nil {
+		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	utils.JSONResponse(w, http.StatusOK, tr)
 }
 
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
-	ctp := r.Context().Value(constants.ContextKey).(types.ContextPayload)
+	user := r.Context().Value(constants.ContextKey).(*models.User)
 
-	err := h.TokenRepository.DeleteTokenMetadata(ctp.TokenId)
+	err := h.TokenRepository.DeleteTokenMetadata(user.ID.Hex())
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusInternalServerError, err)

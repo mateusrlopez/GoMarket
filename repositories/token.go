@@ -33,7 +33,7 @@ func (r *TokenRepository) GenerateTokens(sub string) (*types.TokensReturn, error
 		return nil, err
 	}
 
-	err = r.StoreTokenMetadata(accessUuid, accessExp, sub)
+	err = r.StoreTokenMetadata(accessUuid, accessExp, sub, "access")
 
 	if err != nil {
 		return nil, err
@@ -54,7 +54,7 @@ func (r *TokenRepository) GenerateTokens(sub string) (*types.TokensReturn, error
 		return nil, err
 	}
 
-	err = r.StoreTokenMetadata(refreshUuid, refreshExp, sub)
+	err = r.StoreTokenMetadata(refreshUuid, refreshExp, sub, "refresh")
 
 	if err != nil {
 		return nil, err
@@ -63,8 +63,8 @@ func (r *TokenRepository) GenerateTokens(sub string) (*types.TokensReturn, error
 	return &types.TokensReturn{AccessToken: accessToken, RefreshToken: refreshToken}, nil
 }
 
-func (r *TokenRepository) StoreTokenMetadata(uuid string, exp int64, sub string) error {
-	return r.DB.Set(context.Background(), uuid, sub, time.Until(time.Unix(exp, 0))).Err()
+func (r *TokenRepository) StoreTokenMetadata(uuid string, exp int64, sub string, kind string) error {
+	return r.DB.Set(context.Background(), fmt.Sprintf("%s:%s", kind, sub), uuid, time.Until(time.Unix(exp, 0))).Err()
 }
 
 func (r *TokenRepository) ValidateToken(tokenString string, secret string) (*types.TokenMetadataReturn, error) {
@@ -89,10 +89,10 @@ func (r *TokenRepository) ValidateToken(tokenString string, secret string) (*typ
 	return &types.TokenMetadataReturn{UUID: claims["jti"].(string), UserId: claims["sub"].(string)}, nil
 }
 
-func (r *TokenRepository) RetrieveTokenMetadata(uuid string) error {
-	return r.DB.Get(context.Background(), uuid).Err()
+func (r *TokenRepository) RetrieveTokenMetadata(sub string, kind string) *redis.StringCmd {
+	return r.DB.Get(context.Background(), fmt.Sprintf("%s:%s", kind, sub))
 }
 
-func (r *TokenRepository) DeleteTokenMetadata(uuid string) error {
-	return r.DB.Del(context.Background(), uuid).Err()
+func (r *TokenRepository) DeleteTokenMetadata(sub string) error {
+	return r.DB.Del(context.Background(), fmt.Sprintf("access:%s", sub), fmt.Sprintf("refresh:%s", sub)).Err()
 }
