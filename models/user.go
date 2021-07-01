@@ -32,13 +32,13 @@ func (u *User) BeforeInsert() error {
 	return nil
 }
 
-func (u *User) ComparePassword(password string) error {
+func (u User) ComparePassword(password string) error {
 	return utils.CompareHash(u.Password, password)
 }
 
-func (u *User) ValidateRegister() error {
+func (u User) ValidateRegister() error {
 	return validation.ValidateStruct(
-		u,
+		&u,
 		validation.Field(&u.FirstName, validation.Required),
 		validation.Field(&u.LastName, validation.Required),
 		validation.Field(&u.Email, validation.Required, is.Email),
@@ -47,9 +47,9 @@ func (u *User) ValidateRegister() error {
 	)
 }
 
-func (u *User) ValidateLogin() error {
+func (u User) ValidateLogin() error {
 	return validation.ValidateStruct(
-		u,
+		&u,
 		validation.Field(&u.Email, validation.Required),
 		validation.Field(&u.Password, validation.Required),
 	)

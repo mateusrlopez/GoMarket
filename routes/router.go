@@ -21,12 +21,14 @@ func SetupRoutes() *mux.Router {
 	db := database.GetMongoConnection()
 	rdb := database.GetRedisConnection()
 
+	productRepository := repositories.ProductRepository{Collection: db.Collection("products")}
+	reviewRepository := repositories.ReviewRepository{Collection: db.Collection("reviews")}
 	tokenRepository := repositories.TokenRepository{DB: rdb}
 	userRepository := repositories.UserRepository{Collection: db.Collection("users")}
-	productRepository := repositories.ProductRepository{Collection: db.Collection("products")}
 
 	authHandler := handlers.AuthHandler{TokenRepository: tokenRepository, UserRepository: userRepository}
 	productHandler := handlers.ProductHandler{ProductRepository: productRepository}
+	reviewHandler := handlers.ReviewHandler{ReviewRepository: reviewRepository}
 
 	authMiddleware := middlewares.AuthorizationMiddleware{TokenRepository: tokenRepository, UserRepository: userRepository}
 
@@ -39,8 +41,13 @@ func SetupRoutes() *mux.Router {
 	sr.HandleFunc("/products", authMiddleware.AccessMiddleware(productHandler.Index)).Methods(http.MethodGet)
 	sr.HandleFunc("/products", authMiddleware.AccessMiddleware(middlewares.AdminMiddleware(productHandler.Create))).Methods(http.MethodPost)
 	sr.HandleFunc("/products/{id}", authMiddleware.AccessMiddleware(productHandler.Get)).Methods(http.MethodGet)
-	sr.HandleFunc("/products/{id}", authMiddleware.AccessMiddleware(middlewares.AdminMiddleware(productHandler.Update))).Methods(http.MethodPut)
+	sr.HandleFunc("/products/{id}", authMiddleware.AccessMiddleware(middlewares.AdminMiddleware(productHandler.Update))).Methods(http.MethodPut, http.MethodPatch)
 	sr.HandleFunc("/products/{id}", authMiddleware.AccessMiddleware(middlewares.AdminMiddleware(productHandler.Delete))).Methods(http.MethodDelete)
+
+	sr.HandleFunc("/reviews", authMiddleware.AccessMiddleware(reviewHandler.Index)).Methods(http.MethodGet)
+	sr.HandleFunc("/reviews", authMiddleware.AccessMiddleware(reviewHandler.Create)).Methods(http.MethodPost)
+	sr.HandleFunc("/reviews/{id}", authMiddleware.AccessMiddleware(reviewHandler.Update)).Methods(http.MethodPut, http.MethodPatch)
+	sr.HandleFunc("/reviews/{id}", authMiddleware.AccessMiddleware(reviewHandler.Delete)).Methods(http.MethodDelete)
 
 	return r
 }

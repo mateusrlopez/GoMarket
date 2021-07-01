@@ -12,22 +12,22 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type ProductHandler struct {
-	ProductRepository repositories.ProductRepository
+type ReviewHandler struct {
+	ReviewRepository repositories.ReviewRepository
 }
 
-func (h *ProductHandler) Index(w http.ResponseWriter, r *http.Request) {
-	products, err := h.ProductRepository.RetrieveAll()
+func (h *ReviewHandler) Index(w http.ResponseWriter, r *http.Request) {
+	reviews, err := h.ReviewRepository.RetrieveAll()
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	utils.JSONResponse(w, http.StatusOK, products)
+	utils.JSONResponse(w, http.StatusOK, reviews)
 }
 
-func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
+func (h *ReviewHandler) Create(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
@@ -35,22 +35,22 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product := models.Product{}
-	err = json.Unmarshal(body, &product)
+	review := models.Review{}
+	err = json.Unmarshal(body, &review)
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	err = product.Validate()
+	err = review.Validate()
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	result, err := h.ProductRepository.Create(&product)
+	result, err := h.ReviewRepository.Create(&review)
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
@@ -60,27 +60,7 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 	utils.JSONResponse(w, http.StatusCreated, map[string]interface{}{"id": result.InsertedID.(primitive.ObjectID).Hex()})
 }
 
-func (h *ProductHandler) Get(w http.ResponseWriter, r *http.Request) {
-	params := mux.Vars(r)
-	id, err := primitive.ObjectIDFromHex(params["id"])
-
-	if err != nil {
-		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	product := models.Product{}
-	err = h.ProductRepository.RetrieveByID(id, &product)
-
-	if err != nil {
-		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
-		return
-	}
-
-	utils.JSONResponse(w, http.StatusOK, product)
-}
-
-func (h *ProductHandler) Update(w http.ResponseWriter, r *http.Request) {
+func (h *ReviewHandler) Update(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := primitive.ObjectIDFromHex(params["id"])
 
@@ -96,22 +76,22 @@ func (h *ProductHandler) Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	product := models.Product{}
-	err = json.Unmarshal(body, &product)
+	review := models.Review{}
+	err = json.Unmarshal(body, &review)
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	err = product.Validate()
+	err = review.Validate()
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	_, err = h.ProductRepository.Update(id, &product)
+	_, err = h.ReviewRepository.Update(id, &review)
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
@@ -121,7 +101,7 @@ func (h *ProductHandler) Update(w http.ResponseWriter, r *http.Request) {
 	utils.JSONResponse(w, http.StatusNoContent, map[string]interface{}{})
 }
 
-func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
+func (h *ReviewHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	id, err := primitive.ObjectIDFromHex(params["id"])
 
@@ -130,7 +110,7 @@ func (h *ProductHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = h.ProductRepository.Delete(id)
+	_, err = h.ReviewRepository.Delete(id)
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)

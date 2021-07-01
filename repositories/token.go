@@ -63,8 +63,8 @@ func (r *TokenRepository) GenerateTokens(sub string) (*types.TokensReturn, error
 	return &types.TokensReturn{AccessToken: accessToken, RefreshToken: refreshToken}, nil
 }
 
-func (r *TokenRepository) StoreTokenMetadata(uuid string, exp int64, sub string, kind string) error {
-	return r.DB.Set(context.Background(), fmt.Sprintf("%s:%s", kind, sub), uuid, time.Until(time.Unix(exp, 0))).Err()
+func (r *TokenRepository) StoreTokenMetadata(uuid string, exp int64, sub string, tokenType string) error {
+	return r.DB.Set(context.Background(), fmt.Sprintf("%s:%s", tokenType, sub), uuid, time.Until(time.Unix(exp, 0))).Err()
 }
 
 func (r *TokenRepository) ValidateToken(tokenString string, secret string) (*types.TokenMetadataReturn, error) {
@@ -89,8 +89,8 @@ func (r *TokenRepository) ValidateToken(tokenString string, secret string) (*typ
 	return &types.TokenMetadataReturn{UUID: claims["jti"].(string), UserId: claims["sub"].(string)}, nil
 }
 
-func (r *TokenRepository) RetrieveTokenMetadata(sub string, kind string) *redis.StringCmd {
-	return r.DB.Get(context.Background(), fmt.Sprintf("%s:%s", kind, sub))
+func (r *TokenRepository) RetrieveTokenMetadata(sub string, tokenType string) *redis.StringCmd {
+	return r.DB.Get(context.Background(), fmt.Sprintf("%s:%s", tokenType, sub))
 }
 
 func (r *TokenRepository) DeleteTokenMetadata(sub string) error {

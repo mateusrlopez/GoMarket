@@ -25,9 +25,9 @@ func (r *UserRepository) Create(user *models.User) (*mongo.InsertOneResult, erro
 }
 
 func (r *UserRepository) RetrieveByEmail(email string, user *models.User) error {
-	return r.Collection.FindOne(context.Background(), bson.M{"email": email}).Decode(user)
+	return r.Collection.FindOne(context.Background(), bson.M{"email": bson.M{"$eq": email}}).Decode(user)
 }
 
 func (r *UserRepository) RetriveByID(id primitive.ObjectID, user *models.User) error {
-	return r.Collection.FindOne(context.Background(), bson.M{"_id": id}, options.FindOne().SetProjection(map[string]interface{}{"password": 0})).Decode(user)
+	return r.Collection.FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, options.FindOne().SetProjection(bson.M{"password": 0})).Decode(user)
 }

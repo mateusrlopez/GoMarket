@@ -36,13 +36,13 @@ func (r *ProductRepository) RetrieveAll() ([]models.Product, error) {
 }
 
 func (r *ProductRepository) RetrieveByID(id primitive.ObjectID, product *models.Product) error {
-	return r.Collection.FindOne(context.Background(), bson.M{"_id": id}).Decode(product)
+	return r.Collection.FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Decode(product)
 }
 
 func (r *ProductRepository) Update(id primitive.ObjectID, product *models.Product) (*mongo.UpdateResult, error) {
-	return r.Collection.UpdateByID(context.Background(), id, product)
+	return r.Collection.UpdateOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, bson.M{"$set": product})
 }
 
 func (r *ProductRepository) Delete(id primitive.ObjectID) (*mongo.DeleteResult, error) {
-	return r.Collection.DeleteOne(context.Background(), bson.M{"_id": id})
+	return r.Collection.DeleteOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}})
 }
