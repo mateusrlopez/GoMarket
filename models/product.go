@@ -5,7 +5,7 @@ import (
 
 	validation "github.com/go-ozzo/ozzo-validation/v4"
 	"github.com/go-ozzo/ozzo-validation/v4/is"
-	"github.com/mateusrlopez/go-market/types"
+	"github.com/mateusrlopez/go-market/shared/types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

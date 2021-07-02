@@ -9,7 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/go-redis/redis/v8"
 	"github.com/mateusrlopez/go-market/settings"
-	"github.com/mateusrlopez/go-market/types"
+	"github.com/mateusrlopez/go-market/shared/types"
 	"github.com/twinj/uuid"
 )
 

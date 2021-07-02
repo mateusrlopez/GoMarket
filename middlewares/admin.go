@@ -4,9 +4,9 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/mateusrlopez/go-market/constants"
 	"github.com/mateusrlopez/go-market/models"
-	"github.com/mateusrlopez/go-market/utils"
+	"github.com/mateusrlopez/go-market/shared/constants"
+	"github.com/mateusrlopez/go-market/shared/utils"
 )
 
 func AdminMiddleware(h http.HandlerFunc) http.HandlerFunc {

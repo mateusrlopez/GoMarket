@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/mateusrlopez/go-market/constants"
 	"github.com/mateusrlopez/go-market/models"
 	"github.com/mateusrlopez/go-market/repositories"
 	"github.com/mateusrlopez/go-market/settings"
-	"github.com/mateusrlopez/go-market/utils"
+	"github.com/mateusrlopez/go-market/shared/constants"
+	"github.com/mateusrlopez/go-market/shared/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

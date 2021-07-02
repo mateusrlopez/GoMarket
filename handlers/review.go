@@ -8,7 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mateusrlopez/go-market/models"
 	"github.com/mateusrlopez/go-market/repositories"
-	"github.com/mateusrlopez/go-market/utils"
+	"github.com/mateusrlopez/go-market/shared/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
