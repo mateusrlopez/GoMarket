@@ -7,7 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-func GetDecoder() *schema.Decoder {
+func DecodeQuery(s interface{}, query map[string][]string) error {
 	decoder := schema.NewDecoder()
 	baseId, _ := primitive.ObjectIDFromHex("")
 
@@ -17,5 +17,5 @@ func GetDecoder() *schema.Decoder {
 		return reflect.ValueOf(value)
 	})
 
-	return decoder
+	return decoder.Decode(s, query)
 }

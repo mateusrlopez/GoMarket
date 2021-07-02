@@ -20,7 +20,7 @@ type ReviewHandler struct {
 func (h *ReviewHandler) Index(w http.ResponseWriter, r *http.Request) {
 	query := types.ReviewIndexQuery{}
 
-	if err := utils.GetDecoder().Decode(&query, r.URL.Query()); err != nil {
+	if err := utils.DecodeQuery(&query, r.URL.Query()); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -44,16 +44,13 @@ func (h *ReviewHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	review := models.Review{}
-	err = json.Unmarshal(body, &review)
 
-	if err != nil {
+	if err = json.Unmarshal(body, &review); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	err = review.Validate()
-
-	if err != nil {
+	if err = review.Validate(); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -85,16 +82,13 @@ func (h *ReviewHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	review := models.Review{}
-	err = json.Unmarshal(body, &review)
 
-	if err != nil {
+	if err = json.Unmarshal(body, &review); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	err = review.Validate()
-
-	if err != nil {
+	if err = review.Validate(); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}

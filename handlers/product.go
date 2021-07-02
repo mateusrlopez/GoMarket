@@ -36,16 +36,13 @@ func (h *ProductHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	product := models.Product{}
-	err = json.Unmarshal(body, &product)
 
-	if err != nil {
+	if err = json.Unmarshal(body, &product); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	err = product.Validate()
-
-	if err != nil {
+	if err = product.Validate(); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -70,9 +67,8 @@ func (h *ProductHandler) Get(w http.ResponseWriter, r *http.Request) {
 	}
 
 	product := models.Product{}
-	err = h.ProductRepository.RetrieveByID(id, &product)
 
-	if err != nil {
+	if err = h.ProductRepository.RetrieveByID(id, &product); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -97,16 +93,13 @@ func (h *ProductHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	product := models.Product{}
-	err = json.Unmarshal(body, &product)
 
-	if err != nil {
+	if err = json.Unmarshal(body, &product); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	err = product.Validate()
-
-	if err != nil {
+	if err = product.Validate(); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}

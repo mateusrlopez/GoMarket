@@ -26,16 +26,13 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := models.User{}
-	err = json.Unmarshal(body, &user)
 
-	if err != nil {
+	if err = json.Unmarshal(body, &user); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	err = user.ValidateRegister()
-
-	if err != nil {
+	if err = user.ValidateRegister(); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -66,31 +63,25 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := models.User{}
-	err = json.Unmarshal(body, &user)
 
-	if err != nil {
+	if err = json.Unmarshal(body, &user); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	err = user.ValidateLogin()
-
-	if err != nil {
+	if err = user.ValidateLogin(); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
 	retrievedUser := models.User{}
-	err = h.UserRepository.RetrieveByEmail(user.Email, &retrievedUser)
 
-	if err != nil {
+	if err = h.UserRepository.RetrieveByEmail(user.Email, &retrievedUser); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
 
-	err = retrievedUser.ComparePassword(user.Password)
-
-	if err != nil {
+	if err = retrievedUser.ComparePassword(user.Password); err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
 		return
 	}
@@ -127,9 +118,7 @@ func (h *AuthHandler) Refresh(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	user := r.Context().Value(constants.ContextKey).(*models.User)
 
-	err := h.TokenRepository.DeleteTokenMetadata(user.ID.Hex())
-
-	if err != nil {
+	if err := h.TokenRepository.DeleteTokenMetadata(user.ID.Hex()); err != nil {
 		utils.ErrorResponse(w, http.StatusInternalServerError, err)
 		return
 	}
