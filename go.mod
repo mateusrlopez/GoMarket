@@ -8,6 +8,7 @@ require (
 	github.com/go-ozzo/ozzo-validation/v4 v4.3.0
 	github.com/go-redis/redis/v8 v8.10.0
 	github.com/gorilla/mux v1.8.0
+	github.com/gorilla/schema v1.2.0
 	github.com/joho/godotenv v1.3.0
 	github.com/myesui/uuid v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1

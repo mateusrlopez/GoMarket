@@ -9,7 +9,7 @@ import (
 
 type Review struct {
 	ID         primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
-	ProductID  primitive.ObjectID `json:"productId" bson:"product_id"`
+	ProductID  primitive.ObjectID `json:"productId" bson:"productId"`
 	Name       string             `json:"name" bson:"name"`
 	Rating     float64            `json:"rating" bson:"rating"`
 	Commentary string             `json:"commentary" bson:"commentary"`

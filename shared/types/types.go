@@ -1,6 +1,9 @@
 package types
 
-import validation "github.com/go-ozzo/ozzo-validation/v4"
+import (
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type ContextKey string
 
@@ -17,6 +20,10 @@ type TokenMetadataReturn struct {
 type Attributes struct {
 	Name  string `json:"name" bson:"name"`
 	Value string `json:"value" bson:"value"`
+}
+
+type ReviewIndexQuery struct {
+	ProductID primitive.ObjectID `schema:"productId" bson:"productId"`
 }
 
 type Options struct {

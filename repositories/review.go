@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/mateusrlopez/go-market/models"
+	"github.com/mateusrlopez/go-market/shared/types"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,10 +20,10 @@ func (r *ReviewRepository) Create(review *models.Review) (*mongo.InsertOneResult
 	return r.Collection.InsertOne(context.Background(), review)
 }
 
-func (r *ReviewRepository) RetrieveAll() ([]models.Review, error) {
+func (r *ReviewRepository) RetrieveAll(filter *types.ReviewIndexQuery) ([]models.Review, error) {
 	var reviews []models.Review
 
-	cursor, err := r.Collection.Find(context.Background(), bson.M{})
+	cursor, err := r.Collection.Find(context.Background(), filter)
 
 	if err != nil {
 		return nil, err

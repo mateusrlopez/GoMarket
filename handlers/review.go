@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/mateusrlopez/go-market/models"
 	"github.com/mateusrlopez/go-market/repositories"
+	"github.com/mateusrlopez/go-market/shared/types"
 	"github.com/mateusrlopez/go-market/shared/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -17,7 +18,14 @@ type ReviewHandler struct {
 }
 
 func (h *ReviewHandler) Index(w http.ResponseWriter, r *http.Request) {
-	reviews, err := h.ReviewRepository.RetrieveAll()
+	query := types.ReviewIndexQuery{}
+
+	if err := utils.GetDecoder().Decode(&query, r.URL.Query()); err != nil {
+		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
+		return
+	}
+
+	reviews, err := h.ReviewRepository.RetrieveAll(&query)
 
 	if err != nil {
 		utils.ErrorResponse(w, http.StatusUnprocessableEntity, err)
