@@ -23,12 +23,14 @@ func SetupRoutes() *mux.Router {
 
 	productRepository := repositories.ProductRepository{Collection: db.Collection("products")}
 	reviewRepository := repositories.ReviewRepository{Collection: db.Collection("reviews")}
+	skuRepository := repositories.SkuRepository{Collection: db.Collection("skus")}
 	tokenRepository := repositories.TokenRepository{DB: rdb}
 	userRepository := repositories.UserRepository{Collection: db.Collection("users")}
 
 	authHandler := handlers.AuthHandler{TokenRepository: tokenRepository, UserRepository: userRepository}
 	productHandler := handlers.ProductHandler{ProductRepository: productRepository}
 	reviewHandler := handlers.ReviewHandler{ReviewRepository: reviewRepository}
+	skuHandler := handlers.SkuHandler{SkuRepository: skuRepository}
 
 	authMiddleware := middlewares.AuthorizationMiddleware{TokenRepository: tokenRepository, UserRepository: userRepository}
 
@@ -48,6 +50,11 @@ func SetupRoutes() *mux.Router {
 	sr.HandleFunc("/reviews", authMiddleware.AccessMiddleware(reviewHandler.Create)).Methods(http.MethodPost)
 	sr.HandleFunc("/reviews/{id}", authMiddleware.AccessMiddleware(reviewHandler.Update)).Methods(http.MethodPut, http.MethodPatch)
 	sr.HandleFunc("/reviews/{id}", authMiddleware.AccessMiddleware(reviewHandler.Delete)).Methods(http.MethodDelete)
+
+	sr.HandleFunc("/skus", authMiddleware.AccessMiddleware(skuHandler.Index)).Methods(http.MethodGet)
+	sr.HandleFunc("/skus", authMiddleware.AccessMiddleware(middlewares.AdminMiddleware(skuHandler.Create))).Methods(http.MethodPost)
+	sr.HandleFunc("/skus/{id}", authMiddleware.AccessMiddleware(middlewares.AdminMiddleware(skuHandler.Update))).Methods(http.MethodPut, http.MethodPatch)
+	sr.HandleFunc("/skus/{id}", authMiddleware.AccessMiddleware(middlewares.AdminMiddleware(skuHandler.Delete))).Methods(http.MethodDelete)
 
 	return r
 }
