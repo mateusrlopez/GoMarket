@@ -14,7 +14,7 @@ type UserRepository struct {
 	Collection *mongo.Collection
 }
 
-func (r *UserRepository) Create(user *models.User) (*mongo.InsertOneResult, error) {
+func (r UserRepository) Create(user *models.User) (*mongo.InsertOneResult, error) {
 	err := user.BeforeInsert()
 
 	if err != nil {
@@ -24,10 +24,10 @@ func (r *UserRepository) Create(user *models.User) (*mongo.InsertOneResult, erro
 	return r.Collection.InsertOne(context.Background(), user)
 }
 
-func (r *UserRepository) RetrieveByEmail(email string, user *models.User) error {
+func (r UserRepository) RetrieveByEmail(email string, user *models.User) error {
 	return r.Collection.FindOne(context.Background(), bson.M{"email": bson.M{"$eq": email}}).Decode(user)
 }
 
-func (r *UserRepository) RetriveByID(id primitive.ObjectID, user *models.User) error {
+func (r UserRepository) RetriveByID(id primitive.ObjectID, user *models.User) error {
 	return r.Collection.FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, options.FindOne().SetProjection(bson.M{"password": 0})).Decode(user)
 }

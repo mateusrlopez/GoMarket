@@ -21,6 +21,10 @@ type settings struct {
 		Port     int
 		Database int
 	}
+
+	Stripe struct {
+		Token string
+	}
 }
 
 var Settings settings

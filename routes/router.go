@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/mateusrlopez/go-market/clients"
 	"github.com/mateusrlopez/go-market/database"
 	"github.com/mateusrlopez/go-market/handlers"
 	"github.com/mateusrlopez/go-market/middlewares"
@@ -21,6 +22,10 @@ func SetupRoutes() *mux.Router {
 	db := database.GetMongoConnection()
 	rdb := database.GetRedisConnection()
 
+	stripeClient := clients.GetStripeClient()
+
+	orderRepository := repositories.OrderRepository{Collection: db.Collection("orders")}
+	paymentRepository := repositories.PaymentRepository{Collection: db.Collection("payments"), StripeClient: stripeClient}
 	productRepository := repositories.ProductRepository{Collection: db.Collection("products")}
 	reviewRepository := repositories.ReviewRepository{Collection: db.Collection("reviews")}
 	skuRepository := repositories.SkuRepository{Collection: db.Collection("skus")}
@@ -28,6 +33,8 @@ func SetupRoutes() *mux.Router {
 	userRepository := repositories.UserRepository{Collection: db.Collection("users")}
 
 	authHandler := handlers.AuthHandler{TokenRepository: tokenRepository, UserRepository: userRepository}
+	orderHandler := handlers.OrderHandler{OrderRepository: orderRepository}
+	paymentHandler := handlers.PaymentHandler{PaymentRepository: paymentRepository}
 	productHandler := handlers.ProductHandler{ProductRepository: productRepository}
 	reviewHandler := handlers.ReviewHandler{ReviewRepository: reviewRepository}
 	skuHandler := handlers.SkuHandler{SkuRepository: skuRepository}
@@ -39,6 +46,16 @@ func SetupRoutes() *mux.Router {
 	sr.HandleFunc("/auth/refresh", authMiddleware.RefreshMiddleware(authHandler.Refresh)).Methods(http.MethodPost)
 	sr.HandleFunc("/auth/logout", authMiddleware.AccessMiddleware(authHandler.Logout)).Methods(http.MethodPost)
 	sr.HandleFunc("/auth/me", authMiddleware.AccessMiddleware(authHandler.Me)).Methods(http.MethodGet)
+
+	sr.HandleFunc("/orders", authMiddleware.AccessMiddleware(orderHandler.Index)).Methods(http.MethodGet)
+	sr.HandleFunc("/orders", authMiddleware.AccessMiddleware(orderHandler.Create)).Methods(http.MethodPost)
+	sr.HandleFunc("/orders/{id}", authMiddleware.AccessMiddleware(orderHandler.Get)).Methods(http.MethodGet)
+	sr.HandleFunc("/orders/{id}", authMiddleware.AccessMiddleware(orderHandler.Update)).Methods(http.MethodPut, http.MethodPatch)
+	sr.HandleFunc("/orders/{id}", authMiddleware.AccessMiddleware(orderHandler.Delete)).Methods(http.MethodDelete)
+
+	sr.HandleFunc("/payments", authMiddleware.AccessMiddleware(paymentHandler.Index)).Methods(http.MethodGet)
+	sr.HandleFunc("/payments", authMiddleware.AccessMiddleware(paymentHandler.Create)).Methods(http.MethodPost)
+	sr.HandleFunc("/payments/{id}", authMiddleware.AccessMiddleware(paymentHandler.Get)).Methods(http.MethodGet)
 
 	sr.HandleFunc("/products", authMiddleware.AccessMiddleware(productHandler.Index)).Methods(http.MethodGet)
 	sr.HandleFunc("/products", authMiddleware.AccessMiddleware(middlewares.AdminMiddleware(productHandler.Create))).Methods(http.MethodPost)

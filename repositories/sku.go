@@ -14,13 +14,13 @@ type SkuRepository struct {
 	Collection *mongo.Collection
 }
 
-func (r *SkuRepository) Create(sku *models.SKU) (*mongo.InsertOneResult, error) {
+func (r SkuRepository) Create(sku *models.SKU) (*mongo.InsertOneResult, error) {
 	sku.BeforeInsert()
 
 	return r.Collection.InsertOne(context.Background(), sku)
 }
 
-func (r *SkuRepository) RetrieveAll(filter *types.SkuIndexQuery) ([]models.SKU, error) {
+func (r SkuRepository) RetrieveAll(filter *types.SkuIndexQuery) ([]models.SKU, error) {
 	var skus []models.SKU
 
 	cursor, err := r.Collection.Find(context.Background(), filter)
@@ -36,10 +36,10 @@ func (r *SkuRepository) RetrieveAll(filter *types.SkuIndexQuery) ([]models.SKU, 
 	return skus, nil
 }
 
-func (r *SkuRepository) Update(id primitive.ObjectID, sku *models.SKU) (*mongo.UpdateResult, error) {
+func (r SkuRepository) Update(id primitive.ObjectID, sku *models.SKU) (*mongo.UpdateResult, error) {
 	return r.Collection.UpdateOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, bson.M{"$set": sku})
 }
 
-func (r *SkuRepository) Delete(id primitive.ObjectID) (*mongo.DeleteResult, error) {
+func (r SkuRepository) Delete(id primitive.ObjectID) (*mongo.DeleteResult, error) {
 	return r.Collection.DeleteOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}})
 }

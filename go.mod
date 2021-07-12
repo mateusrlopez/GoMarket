@@ -12,6 +12,7 @@ require (
 	github.com/joho/godotenv v1.3.0
 	github.com/myesui/uuid v1.0.0 // indirect
 	github.com/sirupsen/logrus v1.8.1
+	github.com/stripe/stripe-go/v72 v72.56.0
 	github.com/twinj/uuid v1.0.0
 	github.com/vrischmann/envconfig v1.3.0
 	go.mongodb.org/mongo-driver v1.5.3

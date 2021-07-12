@@ -9,3 +9,11 @@ type ReviewIndexQuery struct {
 type SkuIndexQuery struct {
 	ProductID primitive.ObjectID `schema:"productId" bson:"productId"`
 }
+
+type OrderIndexQuery struct {
+	UserID primitive.ObjectID `schema:"userId" bson:"userId"`
+}
+
+type PaymentIndexQuery struct {
+	UserID primitive.ObjectID `schema:"userId" bson:"userId"`
+}
