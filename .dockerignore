@@ -1,0 +1,13 @@
+.vscode
+.git
+
+vendor
+
+.dockerignore
+.editorconfig
+.env*
+.gitignore
+
+docker-compose.yaml
+Dockerfile
+Makefile

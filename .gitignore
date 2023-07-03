@@ -1,1 +1,8 @@
-.env
+.vscode
+.idea
+.DS_Store
+
+vendor
+
+.env*
+!.env.example

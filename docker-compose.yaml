@@ -1,0 +1,20 @@
+version: "3"
+
+services:
+  mongo:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    container_name: mongo_container
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: gomarket
+      MONGO_INITDB_DATABASE: gomarket
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    container_name: redis_container
+    restart: always
