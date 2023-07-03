@@ -5,7 +5,6 @@ import (
 	"github.com/mateusrlopez/go-market/internal/inputs"
 	"github.com/mateusrlopez/go-market/internal/models"
 	"github.com/mateusrlopez/go-market/internal/repositories"
-	"github.com/stripe/stripe-go/v74/client"
 )
 
 type OrdersService interface {
@@ -13,17 +12,16 @@ type OrdersService interface {
 	FindMany(input inputs.QueryOrdersInput) ([]models.Order, error)
 	FindOneByID(id string) (models.Order, error)
 	UpdateOneByID(id string, input inputs.UpdateOrderInput) (models.Order, error)
+	DeleteOneByID(id string) error
 }
 
 type ordersServiceImplementation struct {
 	repository repositories.OrdersRepository
-	stripe     *client.API
 }
 
-func NewOrdersService(repository repositories.OrdersRepository, stripe *client.API) OrdersService {
+func NewOrdersService(repository repositories.OrdersRepository) OrdersService {
 	return ordersServiceImplementation{
 		repository: repository,
-		stripe:     stripe,
 	}
 }
 
@@ -59,4 +57,8 @@ func (s ordersServiceImplementation) UpdateOneByID(id string, input inputs.Updat
 	}
 
 	return s.repository.UpdateOneByID(id, data)
+}
+
+func (s ordersServiceImplementation) DeleteOneByID(id string) error {
+	return s.repository.DeleteOneByID(id)
 }

@@ -96,3 +96,18 @@ func (c OrdersController) UpdateOneByID(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"order": updated})
 }
+
+func (c OrdersController) RemoveOneByID(ctx *gin.Context) {
+	id := ctx.Param("id")
+
+	if err := c.service.DeleteOneByID(id); err != nil {
+		if errors.Is(err, customerrors.ErrOrderNotFound) {
+			ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		} else {
+			ctx.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, gin.H{})
+}

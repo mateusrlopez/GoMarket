@@ -23,11 +23,9 @@ func New() *http.Server {
 	mongoConfiguration := configurations.NewMongoConfiguration()
 	redisConfiguration := configurations.NewRedisConfiguration()
 	serverConfiguration := configurations.NewServerConfiguration()
-	stripeConfiguration := configurations.NewStripeConfiguration()
 
 	mongoClient := clients.NewMongoClient(mongoConfiguration)
 	redisClient := clients.NewRedisClient(redisConfiguration)
-	stripeClient := clients.NewStripeClient(stripeConfiguration)
 
 	usersRepository := repositories.NewUsersRepository(mongoClient)
 	tokenRepository := repositories.NewTokenRepository(redisClient)
@@ -40,7 +38,7 @@ func New() *http.Server {
 	authService := services.NewAuthService(tokenService, usersService)
 	productsService := services.NewProductsService(productsRepository)
 	reviewsService := services.NewReviewsService(reviewsRepository)
-	ordersService := services.NewOrdersService(ordersRepository, stripeClient)
+	ordersService := services.NewOrdersService(ordersRepository)
 
 	authController := controllers.NewAuthController(authService)
 	usersController := controllers.NewUsersController(usersService)
@@ -90,6 +88,7 @@ func New() *http.Server {
 			orders.GET("/", ordersController.Index)
 			orders.GET("/:id", ordersController.GetOneByID)
 			orders.PUT("/:id", ordersController.UpdateOneByID)
+			orders.DELETE("/:id", ordersController.RemoveOneByID)
 		}
 	}
 

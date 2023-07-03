@@ -18,6 +18,7 @@ type OrdersRepository interface {
 	FindMany(filter models.Order) ([]models.Order, error)
 	FindOneByID(id string) (models.Order, error)
 	UpdateOneByID(id string, data models.Order) (models.Order, error)
+	DeleteOneByID(id string) error
 }
 
 type mongoOrdersRepository struct {
@@ -102,4 +103,16 @@ func (r mongoOrdersRepository) UpdateOneByID(id string, data models.Order) (mode
 	}
 
 	return updated, nil
+}
+
+func (r mongoOrdersRepository) DeleteOneByID(id string) error {
+	if err := r.db.Collection("orders").FindOneAndDelete(context.TODO(), bson.M{"_id": bson.M{"$eq": id}}).Err(); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return customerrors.ErrOrderNotFound
+		}
+
+		return err
+	}
+
+	return nil
 }
