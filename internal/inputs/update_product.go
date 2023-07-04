@@ -1,7 +1,5 @@
 package inputs
 
-import "github.com/Rhymond/go-money"
-
 type UpdateProductInput struct {
 	Name           string `json:"name" binding:"required"`
 	Type           string `json:"type" binding:"required"`
@@ -12,9 +10,15 @@ type UpdateProductInput struct {
 	Customizations []struct {
 		Name    string `json:"name" binding:"required"`
 		Options []struct {
-			Name          string       `json:"name" binding:"required"`
-			PriceIncrease *money.Money `json:"priceIncrease" binding:"required"`
+			Name          string `json:"name" binding:"required"`
+			PriceIncrease struct {
+				Amount   int64  `json:"amount" binding:"required"`
+				Currency string `json:"currency" binding:"required"`
+			} `json:"priceIncrease" binding:"required"`
 		} `json:"options" binding:"required"`
 	} `json:"customizations"`
-	Price *money.Money `json:"price" binding:"required"`
+	BasePrice struct {
+		Amount   int64  `json:"amount" binding:"required"`
+		Currency string `json:"currency" binding:"required"`
+	} `json:"basePrice" binding:"required"`
 }

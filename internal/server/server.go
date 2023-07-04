@@ -23,15 +23,18 @@ func New() *http.Server {
 	mongoConfiguration := configurations.NewMongoConfiguration()
 	redisConfiguration := configurations.NewRedisConfiguration()
 	serverConfiguration := configurations.NewServerConfiguration()
+	stripeConfiguration := configurations.NewStripeConfiguration()
 
 	mongoClient := clients.NewMongoClient(mongoConfiguration)
 	redisClient := clients.NewRedisClient(redisConfiguration)
+	stripeClient := clients.NewStripeClient(stripeConfiguration)
 
 	usersRepository := repositories.NewUsersRepository(mongoClient)
 	tokenRepository := repositories.NewTokenRepository(redisClient)
 	productsRepository := repositories.NewProductsRepository(mongoClient)
 	reviewsRepository := repositories.NewReviewsRepository(mongoClient)
 	ordersRepository := repositories.NewOrdersRepository(mongoClient)
+	paymentIntentsRepository := repositories.NewPaymentIntentsRepository(mongoClient)
 
 	usersService := services.NewUsersService(usersRepository)
 	tokenService := services.NewTokenService(jwtConfiguration, tokenRepository)
@@ -39,12 +42,15 @@ func New() *http.Server {
 	productsService := services.NewProductsService(productsRepository)
 	reviewsService := services.NewReviewsService(reviewsRepository)
 	ordersService := services.NewOrdersService(ordersRepository)
+	paymentIntentsService := services.NewPaymentIntentsService(paymentIntentsRepository, ordersService, stripeClient)
 
 	authController := controllers.NewAuthController(authService)
 	usersController := controllers.NewUsersController(usersService)
 	productsController := controllers.NewProductsController(productsService)
 	reviewsController := controllers.NewReviewsController(reviewsService)
 	ordersController := controllers.NewOrdersController(ordersService)
+	paymentIntentsController := controllers.NewPaymentIntentsController(paymentIntentsService)
+	stripeWebhookController := controllers.NewStripeWebhookController(stripeConfiguration, paymentIntentsService)
 
 	v1 := router.Group("/api/v1")
 	{
@@ -90,6 +96,16 @@ func New() *http.Server {
 			orders.PUT("/:id", ordersController.UpdateOneByID)
 			orders.DELETE("/:id", ordersController.RemoveOneByID)
 		}
+
+		paymentIntents := v1.Group("/payment-intents").Use(middlewares.AuthenticationMiddleware(authService))
+		{
+			paymentIntents.POST("/", paymentIntentsController.Create)
+		}
+	}
+
+	stripeWebhook := router.Group("/stripe-wehook")
+	{
+		stripeWebhook.POST("/", stripeWebhookController.HandleEvents)
 	}
 
 	server := &http.Server{

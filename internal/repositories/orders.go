@@ -22,12 +22,12 @@ type OrdersRepository interface {
 }
 
 type mongoOrdersRepository struct {
-	db *mongo.Database
+	mongo *mongo.Database
 }
 
-func NewOrdersRepository(db *mongo.Database) OrdersRepository {
+func NewOrdersRepository(mongo *mongo.Database) OrdersRepository {
 	return mongoOrdersRepository{
-		db: db,
+		mongo: mongo,
 	}
 }
 
@@ -40,7 +40,7 @@ func (r mongoOrdersRepository) Create(order models.Order) (models.Order, error) 
 		return models.Order{}, err
 	}
 
-	_, err := r.db.Collection("orders").InsertOne(context.Background(), &order)
+	_, err := r.mongo.Collection("orders").InsertOne(context.Background(), &order)
 
 	if err != nil {
 		return models.Order{}, err
@@ -52,7 +52,7 @@ func (r mongoOrdersRepository) Create(order models.Order) (models.Order, error) 
 func (r mongoOrdersRepository) FindMany(filter models.Order) ([]models.Order, error) {
 	var orders []models.Order
 
-	cursor, err := r.db.Collection("orders").Find(context.Background(), &filter)
+	cursor, err := r.mongo.Collection("orders").Find(context.Background(), &filter)
 
 	if err != nil {
 		return nil, err
@@ -74,7 +74,7 @@ func (r mongoOrdersRepository) FindMany(filter models.Order) ([]models.Order, er
 func (r mongoOrdersRepository) FindOneByID(id string) (models.Order, error) {
 	var order models.Order
 
-	if err := r.db.Collection("orders").FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Decode(&order); err != nil {
+	if err := r.mongo.Collection("orders").FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Decode(&order); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return models.Order{}, customerrors.ErrOrderNotFound
 		}
@@ -94,7 +94,7 @@ func (r mongoOrdersRepository) UpdateOneByID(id string, data models.Order) (mode
 
 	after := options.After
 
-	if err := r.db.Collection("orders").FindOneAndUpdate(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, bson.M{"$set": &data}, &options.FindOneAndUpdateOptions{ReturnDocument: &after}).Decode(&updated); err != nil {
+	if err := r.mongo.Collection("orders").FindOneAndUpdate(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, bson.M{"$set": &data}, &options.FindOneAndUpdateOptions{ReturnDocument: &after}).Decode(&updated); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return models.Order{}, customerrors.ErrOrderNotFound
 		}
@@ -106,7 +106,7 @@ func (r mongoOrdersRepository) UpdateOneByID(id string, data models.Order) (mode
 }
 
 func (r mongoOrdersRepository) DeleteOneByID(id string) error {
-	if err := r.db.Collection("orders").FindOneAndDelete(context.TODO(), bson.M{"_id": bson.M{"$eq": id}}).Err(); err != nil {
+	if err := r.mongo.Collection("orders").FindOneAndDelete(context.TODO(), bson.M{"_id": bson.M{"$eq": id}}).Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return customerrors.ErrOrderNotFound
 		}

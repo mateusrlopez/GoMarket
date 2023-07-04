@@ -23,12 +23,12 @@ type UsersRepository interface {
 }
 
 type mongoUserRepository struct {
-	db *mongo.Database
+	mongo *mongo.Database
 }
 
-func NewUsersRepository(db *mongo.Database) UsersRepository {
+func NewUsersRepository(mongo *mongo.Database) UsersRepository {
 	return mongoUserRepository{
-		db: db,
+		mongo: mongo,
 	}
 }
 
@@ -36,7 +36,7 @@ func (r mongoUserRepository) Create(user models.User) (models.User, error) {
 	user.ID = primitive.NewObjectID().Hex()
 	user.CreatedAt = time.Now()
 
-	_, err := r.db.Collection("users").InsertOne(context.Background(), &user)
+	_, err := r.mongo.Collection("users").InsertOne(context.Background(), &user)
 
 	if err != nil {
 		return models.User{}, err
@@ -48,7 +48,7 @@ func (r mongoUserRepository) Create(user models.User) (models.User, error) {
 func (r mongoUserRepository) FindMany() ([]models.User, error) {
 	var users []models.User
 
-	cursor, err := r.db.Collection("users").Find(context.Background(), bson.D{})
+	cursor, err := r.mongo.Collection("users").Find(context.Background(), bson.D{})
 
 	if err != nil {
 		return nil, err
@@ -70,7 +70,7 @@ func (r mongoUserRepository) FindMany() ([]models.User, error) {
 func (r mongoUserRepository) FindOneByID(id string) (models.User, error) {
 	var user models.User
 
-	if err := r.db.Collection("users").FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Decode(&user); err != nil {
+	if err := r.mongo.Collection("users").FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Decode(&user); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return models.User{}, customerrors.ErrUserNotFound
 		}
@@ -84,7 +84,7 @@ func (r mongoUserRepository) FindOneByID(id string) (models.User, error) {
 func (r mongoUserRepository) FindOneByEmail(email string) (models.User, error) {
 	var user models.User
 
-	if err := r.db.Collection("users").FindOne(context.Background(), bson.M{"email": bson.M{"$eq": email}}).Decode(&user); err != nil {
+	if err := r.mongo.Collection("users").FindOne(context.Background(), bson.M{"email": bson.M{"$eq": email}}).Decode(&user); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return models.User{}, customerrors.ErrUserNotFound
 		}
@@ -100,7 +100,11 @@ func (r mongoUserRepository) UpdateOneByID(id string, data models.User) (models.
 
 	after := options.After
 
-	if err := r.db.Collection("users").FindOneAndUpdate(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, bson.M{"$set": &data}, &options.FindOneAndUpdateOptions{ReturnDocument: &after}).Decode(&updated); err != nil {
+	if err := r.mongo.Collection("users").FindOneAndUpdate(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, bson.M{"$set": &data}, &options.FindOneAndUpdateOptions{ReturnDocument: &after}).Decode(&updated); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return models.User{}, customerrors.ErrUserNotFound
+		}
+
 		return models.User{}, err
 	}
 
@@ -108,7 +112,11 @@ func (r mongoUserRepository) UpdateOneByID(id string, data models.User) (models.
 }
 
 func (r mongoUserRepository) DeleteOneByID(id string) error {
-	if err := r.db.Collection("users").FindOneAndDelete(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Err(); err != nil {
+	if err := r.mongo.Collection("users").FindOneAndDelete(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Err(); err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return customerrors.ErrUserNotFound
+		}
+
 		return err
 	}
 

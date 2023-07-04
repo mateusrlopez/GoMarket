@@ -22,12 +22,12 @@ type ReviewsRepository interface {
 }
 
 type mongoReviewsRepository struct {
-	db *mongo.Database
+	mongo *mongo.Database
 }
 
-func NewReviewsRepository(db *mongo.Database) ReviewsRepository {
+func NewReviewsRepository(mongo *mongo.Database) ReviewsRepository {
 	return mongoReviewsRepository{
-		db: db,
+		mongo: mongo,
 	}
 }
 
@@ -35,7 +35,7 @@ func (r mongoReviewsRepository) Create(review models.Review) (models.Review, err
 	review.ID = primitive.NewObjectID().Hex()
 	review.CreatedAt = time.Now()
 
-	_, err := r.db.Collection("reviews").InsertOne(context.Background(), &review)
+	_, err := r.mongo.Collection("reviews").InsertOne(context.Background(), &review)
 
 	if err != nil {
 		return models.Review{}, err
@@ -47,7 +47,7 @@ func (r mongoReviewsRepository) Create(review models.Review) (models.Review, err
 func (r mongoReviewsRepository) FindMany(filter models.Review) ([]models.Review, error) {
 	var reviews []models.Review
 
-	cursor, err := r.db.Collection("reviews").Find(context.Background(), &filter)
+	cursor, err := r.mongo.Collection("reviews").Find(context.Background(), &filter)
 
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (r mongoReviewsRepository) FindMany(filter models.Review) ([]models.Review,
 func (r mongoReviewsRepository) FindOneByID(id string) (models.Review, error) {
 	var review models.Review
 
-	if err := r.db.Collection("reviews").FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Decode(&review); err != nil {
+	if err := r.mongo.Collection("reviews").FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Decode(&review); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return models.Review{}, customerrors.ErrReviewNotFound
 		}
@@ -85,7 +85,7 @@ func (r mongoReviewsRepository) UpdateOneByID(id string, data models.Review) (mo
 
 	after := options.After
 
-	if err := r.db.Collection("reviews").FindOneAndUpdate(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, bson.M{"$set": &data}, &options.FindOneAndUpdateOptions{ReturnDocument: &after}).Decode(&updated); err != nil {
+	if err := r.mongo.Collection("reviews").FindOneAndUpdate(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, bson.M{"$set": &data}, &options.FindOneAndUpdateOptions{ReturnDocument: &after}).Decode(&updated); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return models.Review{}, customerrors.ErrReviewNotFound
 		}
@@ -97,7 +97,7 @@ func (r mongoReviewsRepository) UpdateOneByID(id string, data models.Review) (mo
 }
 
 func (r mongoReviewsRepository) DeleteOneByID(id string) error {
-	if err := r.db.Collection("reviews").FindOneAndDelete(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Err(); err != nil {
+	if err := r.mongo.Collection("reviews").FindOneAndDelete(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return customerrors.ErrReviewNotFound
 		}

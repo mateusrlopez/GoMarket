@@ -3,7 +3,6 @@ module github.com/mateusrlopez/go-market
 go 1.20
 
 require (
-	github.com/Rhymond/go-money v1.0.10
 	github.com/gin-contrib/cors v1.4.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-faker/faker/v4 v4.1.1
@@ -15,6 +14,7 @@ require (
 	github.com/redis/go-redis/v9 v9.0.5
 	github.com/rs/zerolog v1.29.1
 	github.com/stretchr/testify v1.8.4
+	github.com/stripe/stripe-go/v74 v74.24.0
 	go.mongodb.org/mongo-driver v1.12.0
 	golang.org/x/crypto v0.10.0
 )

@@ -2,8 +2,6 @@ package models
 
 import (
 	"time"
-
-	"github.com/Rhymond/go-money"
 )
 
 type ProductSpecification struct {
@@ -17,8 +15,8 @@ type ProductCustomization struct {
 }
 
 type ProductCustomizationOption struct {
-	Name          string       `json:"name" bson:"name"`
-	PriceIncrease *money.Money `json:"priceIncrease" bson:"priceIncrease"`
+	Name          string `json:"name" bson:"name"`
+	PriceIncrease Money  `json:"priceIncrease" bson:"priceIncrease"`
 }
 
 type Product struct {
@@ -27,6 +25,6 @@ type Product struct {
 	Type           string                 `json:"type" bson:"type"`
 	Specifications []ProductSpecification `json:"specifications" bson:"specifications"`
 	Customizations []ProductCustomization `json:"customizations" bson:"customizations"`
-	BasePrice      *money.Money           `json:"basePrice" bson:"basePrice"`
+	BasePrice      Money                  `json:"basePrice" bson:"basePrice"`
 	CreatedAt      time.Time              `json:"createdAt" bson:"createdAt,omitempty"`
 }

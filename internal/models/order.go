@@ -2,16 +2,14 @@ package models
 
 import (
 	"time"
-
-	"github.com/Rhymond/go-money"
 )
 
 type OrderItem struct {
-	ProductID      string       `json:"productId" bson:"productId"`
-	ProductName    string       `json:"productName" bson:"productName"`
-	Quantity       uint         `json:"quantity" bson:"quantity"`
-	Customizations []string     `json:"customizations" bson:"customizations"`
-	Price          *money.Money `json:"price" bson:"price"`
+	ProductID      string   `json:"productId" bson:"productId"`
+	ProductName    string   `json:"productName" bson:"productName"`
+	Quantity       uint     `json:"quantity" bson:"quantity"`
+	Customizations []string `json:"customizations" bson:"customizations"`
+	Price          Money    `json:"price" bson:"price"`
 }
 
 type OrderShipping struct {
@@ -25,14 +23,14 @@ type Order struct {
 	UserID       string        `json:"userId" bson:"userId,omitempty"`
 	CurrencyCode string        `json:"currencyCode" bson:"currencyCode"`
 	Status       string        `json:"status" bson:"status,omitempty"`
+	TotalPrice   Money         `json:"totalPrice" bson:"totalPrice"`
 	Shipping     OrderShipping `json:"shipping" bson:"shipping"`
-	TotalPrice   *money.Money  `json:"totalPrice" bson:"totalPrice"`
 	Items        []OrderItem   `json:"items" bson:"items"`
 	CreatedAt    time.Time     `json:"createdAt" bson:"createdAt,omitempty"`
 }
 
 func (o *Order) SetTotalPrice() error {
-	amount := money.New(0, o.CurrencyCode)
+	amount := NewMoney(0, o.CurrencyCode)
 
 	for _, item := range o.Items {
 		var err error

@@ -22,12 +22,12 @@ type ProductsRepository interface {
 }
 
 type mongoProductsRepository struct {
-	db *mongo.Database
+	mongo *mongo.Database
 }
 
-func NewProductsRepository(db *mongo.Database) ProductsRepository {
+func NewProductsRepository(mongo *mongo.Database) ProductsRepository {
 	return mongoProductsRepository{
-		db: db,
+		mongo: mongo,
 	}
 }
 
@@ -35,7 +35,7 @@ func (r mongoProductsRepository) Create(product models.Product) (models.Product,
 	product.ID = primitive.NewObjectID().Hex()
 	product.CreatedAt = time.Now()
 
-	_, err := r.db.Collection("products").InsertOne(context.Background(), &product)
+	_, err := r.mongo.Collection("products").InsertOne(context.Background(), &product)
 
 	if err != nil {
 		return models.Product{}, err
@@ -47,7 +47,7 @@ func (r mongoProductsRepository) Create(product models.Product) (models.Product,
 func (r mongoProductsRepository) FindMany() ([]models.Product, error) {
 	var products []models.Product
 
-	cursor, err := r.db.Collection("products").Find(context.Background(), bson.D{})
+	cursor, err := r.mongo.Collection("products").Find(context.Background(), bson.D{})
 
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (r mongoProductsRepository) FindMany() ([]models.Product, error) {
 func (r mongoProductsRepository) FindOneByID(id string) (models.Product, error) {
 	var product models.Product
 
-	if err := r.db.Collection("products").FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Decode(&product); err != nil {
+	if err := r.mongo.Collection("products").FindOne(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Decode(&product); err != nil {
 		return models.Product{}, err
 	}
 
@@ -81,7 +81,7 @@ func (r mongoProductsRepository) UpdateOneByID(id string, data models.Product) (
 
 	after := options.After
 
-	if err := r.db.Collection("products").FindOneAndUpdate(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, bson.M{"$set": &data}, &options.FindOneAndUpdateOptions{ReturnDocument: &after}).Decode(&updated); err != nil {
+	if err := r.mongo.Collection("products").FindOneAndUpdate(context.Background(), bson.M{"_id": bson.M{"$eq": id}}, bson.M{"$set": &data}, &options.FindOneAndUpdateOptions{ReturnDocument: &after}).Decode(&updated); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return models.Product{}, customerrors.ErrProductNotFound
 		}
@@ -93,7 +93,7 @@ func (r mongoProductsRepository) UpdateOneByID(id string, data models.Product) (
 }
 
 func (r mongoProductsRepository) DeleteOneByID(id string) error {
-	if err := r.db.Collection("products").FindOneAndDelete(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Err(); err != nil {
+	if err := r.mongo.Collection("products").FindOneAndDelete(context.Background(), bson.M{"_id": bson.M{"$eq": id}}).Err(); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return customerrors.ErrProductNotFound
 		}

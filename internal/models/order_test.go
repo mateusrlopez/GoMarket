@@ -3,17 +3,16 @@ package models
 import (
 	"testing"
 
-	"github.com/Rhymond/go-money"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSetTotalPrice(t *testing.T) {
 	t.Run("NominalCase", func(t *testing.T) {
 		order := Order{
-			CurrencyCode: money.USD,
+			CurrencyCode: "USD",
 			Items: []OrderItem{
 				{
-					Price:    money.New(100, money.USD),
+					Price:    NewMoney(100, "USD"),
 					Quantity: 3,
 				},
 			},
@@ -22,16 +21,16 @@ func TestSetTotalPrice(t *testing.T) {
 		err := order.SetTotalPrice()
 
 		assert.NoError(t, err)
-		assert.Equal(t, int64(300), order.TotalPrice.Amount())
-		assert.Equal(t, money.USD, order.TotalPrice.Currency().Code)
+		assert.Equal(t, int64(300), order.TotalPrice.Amount)
+		assert.Equal(t, "USD", order.TotalPrice.Currency)
 	})
 
 	t.Run("ErrorCase", func(t *testing.T) {
 		order := Order{
-			CurrencyCode: money.USD,
+			CurrencyCode: "USD",
 			Items: []OrderItem{
 				{
-					Price:    money.New(100, money.EUR),
+					Price:    NewMoney(100, "EUR"),
 					Quantity: 3,
 				},
 			},
@@ -40,6 +39,5 @@ func TestSetTotalPrice(t *testing.T) {
 		err := order.SetTotalPrice()
 
 		assert.Error(t, err)
-		assert.Nil(t, order.TotalPrice)
 	})
 }
